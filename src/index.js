@@ -8,26 +8,6 @@ import {
   downloadAsset,
 } from './utilities.js';
 
-/* const extractAssetsAndWriteFile = (
-  htmlContent,
-  hostname,
-  assetsDirName,
-  outputDirPath,
-  htmlFilePath
-) => {
-  const { html, assetsOptions } = extractAssets(
-    htmlContent,
-    hostname,
-    assetsDirName,
-    outputDirPath
-  );
-  const downloadPromises = assetsOptions.map(downloadAsset);
-
-  return Promise.all([fs.writeFile(htmlFilePath, html), ...downloadPromises]).catch((error) =>
-    console.error(error.message)
-  );
-}; */
-
 const pageLoader = (url, outputDirPath) => {
   const pageUrl = new URL(url);
   const { hostname, pathname } = pageUrl;
@@ -46,44 +26,17 @@ const pageLoader = (url, outputDirPath) => {
         htmlContent,
         pageUrl,
         assetsDirName,
-        outputDirPath
+        outputDirPath,
       );
       const downloadAssetsPromises = assetsOptions.map(downloadAsset);
 
       return Promise.all([fs.writeFile(htmlFilePath, html), ...downloadAssetsPromises]).catch(
-        (error) => console.error(error.message)
+        (error) => console.error(error.message),
       );
     })
     .then(() => console.log(`Page was successfully downloaded into '${htmlFilePath}'`))
     .then(() => htmlFilePath)
     .catch((error) => console.error(`${error.message}:`, error));
 };
-
-/* const pageLoader = (url, outputDirPath) => {
-  const { hostname, pathname } = new URL(url);
-  const formatedUrl = formatToHyphenCase(`${hostname}${pathname}`);
-  const htmlPageName = `${formatedUrl}.html`;
-  const htmlFilePath = path.resolve(outputDirPath, htmlPageName);
-  const assetsDirName = `${formatedUrl}_files`;
-  const assetsDirPath = path.resolve(outputDirPath, assetsDirName);
-
-  return axios
-    .get(url)
-    .then(({ data: htmlContent }) => {
-      return ensureAssetsDirectory(htmlContent, assetsDirPath);
-    })
-    .then((htmlContent) => {
-      const { html, assetsOptions } = extractAssets(htmlContent, hostname, assetsDirName, outputDirPath);
-      assetsOptions.forEach(downloadAsset);
-
-      fs.writeFile(htmlFilePath, html);
-    })
-    //.then((htmlContent) => fs.writeFile(htmlFilePath, htmlContent))
-    .then(() => {
-      console.log(`Page was successfully downloaded into '${htmlFilePath}'`);
-      return htmlFilePath;
-    })
-    .catch((error) => console.error(error.message));
-}; */
 
 export default pageLoader;

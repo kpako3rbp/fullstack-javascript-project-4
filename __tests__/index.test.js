@@ -3,8 +3,8 @@ import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import nock from 'nock';
-import pageLoader from '../src/index.js';
 import prettier from 'prettier';
+import pageLoader from '../src/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -42,7 +42,7 @@ test('Download and save page', async () => {
 
   const outputPath = await pageLoader(testUrl, tempDir);
 
-  //console.log(outputPath, 'outputPath');
+  // console.log(outputPath, 'outputPath');
   console.log(tempDir, 'tempDir');
 
   const resultPage = await fs.readFile(outputPath, 'utf-8');
@@ -51,7 +51,7 @@ test('Download and save page', async () => {
   const prettifiedExpectedPage = await prettier.format(expectedPage, { parser: 'html' });
   const prettifiedResultPage = await prettier.format(resultPage, { parser: 'html' });
 
-  //console.log(os.tmpdir(), 'os.tmpdir()');
+  // console.log(os.tmpdir(), 'os.tmpdir()');
 
   expect(outputPath).toEqual(path.join(tempDir, 'ru-hexlet-io-courses.html'));
   expect(prettifiedResultPage).toEqual(prettifiedExpectedPage);
@@ -73,9 +73,8 @@ test('Download and save page', async () => {
       .catch((error) => {
         if (error.code === 'ENOENT') {
           return false; // Файл не найден
-        } else {
-          throw error; // Ошибка доступа к файлу или другая ошибка
         }
+        throw error; // Ошибка доступа к файлу или другая ошибка
       });
   });
 
