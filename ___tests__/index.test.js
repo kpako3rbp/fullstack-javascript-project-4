@@ -9,10 +9,11 @@ import prettier from 'prettier';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
-const readFile = async (filename) => fs.readFile(getFixturePath(filename), 'utf-8');
+const readFixture = async (filename) => fs.readFile(getFixturePath(filename), 'utf-8');
 const createTempDir = async () => fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 
 nock.disableNetConnect();
+const testUrl = 'https://ru.hexlet.io/courses';
 
 let tempDir;
 
@@ -25,20 +26,21 @@ beforeEach(() => {
 });
 
 test('Download and save page', async () => {
-  const testPage = await readFile('page.html');
-  const expectedPage = await readFile('expected.html');  
+  const testPage = await readFixture('page.html');
 
-  const testOrigin = 'https://ru.hexlet.io';
-  const testPathName = '/courses';
-  const testUrl = path.join(testOrigin, testPathName);
-
-  nock(testOrigin).get(testPathName).reply(200, testPage);
+  nock('https://ru.hexlet.io')
+    .get('/courses')
+    .reply(200, testPage)
+    .get('/assets/professions/nodejs.png')
+    .reply(200, 'nodejs.png');
 
   const outputPath = await pageLoader(testUrl, tempDir);
 
   //console.log(outputPath, 'outputPath');
+  console.log(tempDir, 'tempDir')
 
   const resultPage = await fs.readFile(outputPath, 'utf-8');
+  const expectedPage = await readFixture('expected.html');
 
   const prettifiedExpectedPage = await prettier.format(expectedPage, { parser: 'html' });
   const prettifiedResultPage = await prettier.format(resultPage, { parser: 'html' });
