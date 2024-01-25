@@ -17,7 +17,7 @@ const pageLoader = (url, outputDirPath) => {
       return makeAssetsDir(htmlContent, assetsDirPath);
     })
     .then((htmlContent) => {
-      const { html, assetsOptions } = extractAssets(htmlContent, hostname, assetsDirName);
+      const { html, assetsOptions } = extractAssets(htmlContent, hostname, assetsDirName, outputDirPath);
       assetsOptions.forEach(downloadAsset);
 
       fs.writeFile(htmlPagePath, html);

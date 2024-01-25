@@ -12,10 +12,7 @@ const makeAssetsDir = (htmlContent, assetsDirPath) =>
     .then(() => htmlContent)
     .catch(() => fs.mkdir(assetsDirPath).then(() => htmlContent));
 
-const downloadAsset = ({ url, filepath }) =>
-  axios.get(url, { responseType: 'arraybuffer' }).then(({ data }) => fs.writeFile(filepath, data));
-
-const extractAssets = (htmlContent, hostname, assetsDirName) => {
+const extractAssets = (htmlContent, hostname, assetsDirName, outputDirPath) => {
   const $ = cheerio.load(htmlContent);
 
   const tagsAttributes = {
@@ -38,14 +35,20 @@ const extractAssets = (htmlContent, hostname, assetsDirName) => {
         const filename = `${formatWithHyphen(path.join(hostname, pathnameWithoutExt))}${fileExt}`;
         const localFilePath = path.join(assetsDirName, filename);
 
+        const absoluteFilePath = path.resolve(outputDirPath, localFilePath);
+
         $(element).attr(attrName, localFilePath);
-        assetsOptions.push({ url: fileUrl, filepath: localFilePath });
+        assetsOptions.push({ url: fileUrl, filepath: absoluteFilePath });
         //downloadAsset(fileUrl, localFilePath);
       }
     });
   });
 
+  console.log(assetsOptions, 'assetsOptions')
   return { html: $.html(), assetsOptions };
 };
+
+const downloadAsset = ({ url, filepath }) =>
+  axios.get(url, { responseType: 'arraybuffer' }).then(({ data }) => fs.writeFile(filepath, data));
 
 export { formatWithHyphen, makeAssetsDir, extractAssets, downloadAsset };
