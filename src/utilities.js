@@ -25,7 +25,7 @@ const extractAssets = (htmlContent, pageUrl, assetsDirName, outputDirPath) => {
       const { hostname: currentHostname, pathname } = fileUrl;
 
       if (currentHostname === hostname) {
-        const fileExt = path.extname(pathname);
+        const fileExt = path.extname(pathname) || '.html';
         const pathnameWithoutExt = pathname.replace(fileExt, '');
         const filename = `${formatToHyphenCase(path.join(hostname, pathnameWithoutExt))}${fileExt}`;
         const localFilePath = path.join(assetsDirName, filename);
