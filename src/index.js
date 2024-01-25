@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import { formatWithHyphen, makeAssetsDir, extractAssets } from './utilities.js';
+import { formatWithHyphen, makeAssetsDir, extractAssets, downloadAsset } from './utilities.js';
 import path from 'path';
 import axios from 'axios';
 
@@ -14,10 +14,15 @@ const pageLoader = (url, outputDirPath) => {
   return axios
     .get(url)
     .then(({ data: htmlContent }) => {
-      extractAssets(htmlContent, hostname, assetsDirName);
+      return makeAssetsDir(htmlContent, assetsDirPath);
     })
-    .then((htmlContent) => makeAssetsDir(htmlContent, assetsDirPath))
-    .then((htmlContent) => fs.writeFile(htmlPagePath, htmlContent))
+    .then((htmlContent) => {
+      const { html, assetsOptions } = extractAssets(htmlContent, hostname, assetsDirName);
+      assetsOptions.forEach(downloadAsset);
+
+      fs.writeFile(htmlPagePath, html);
+    })
+    //.then((htmlContent) => fs.writeFile(htmlPagePath, htmlContent))
     .then(() => {
       console.log(`Page was successfully downloaded into '${htmlPagePath}'`);
       return htmlPagePath;

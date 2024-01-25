@@ -12,7 +12,7 @@ const makeAssetsDir = (htmlContent, assetsDirPath) =>
     .then(() => htmlContent)
     .catch(() => fs.mkdir(assetsDirPath).then(() => htmlContent));
 
-const downloadAsset = (url, filepath) =>
+const downloadAsset = ({ url, filepath }) =>
   axios.get(url, { responseType: 'arraybuffer' }).then(({ data }) => fs.writeFile(filepath, data));
 
 const extractAssets = (htmlContent, hostname, assetsDirName) => {
@@ -24,7 +24,7 @@ const extractAssets = (htmlContent, hostname, assetsDirName) => {
     script: 'src',
   };
 
-  //const assetPaths = [];
+  const assetsOptions = [];
 
   Object.entries(tagsAttributes).forEach(([tagName, attrName]) => {
     $(tagName).each((index, element) => {
@@ -39,13 +39,13 @@ const extractAssets = (htmlContent, hostname, assetsDirName) => {
         const localFilePath = path.join(assetsDirName, filename);
 
         $(element).attr(attrName, localFilePath);
-        //assetPaths.push({ url: fileUrl, path: localFilePath });
-        downloadAsset(fileUrl, localFilePath);
+        assetsOptions.push({ url: fileUrl, filepath: localFilePath });
+        //downloadAsset(fileUrl, localFilePath);
       }
     });
   });
 
-  return $.html();
+  return { html: $.html(), assetsOptions };
 };
 
 export { formatWithHyphen, makeAssetsDir, extractAssets, downloadAsset };
