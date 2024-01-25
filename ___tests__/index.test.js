@@ -1,4 +1,4 @@
-import { promises as fsPromises } from 'node:fs';
+import { fs } from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,8 +8,8 @@ import pageLoader from '../src/index.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
-const readFile = async (filename) => fsPromises.readFile(getFixturePath(filename), 'utf-8');
-const createTempDir = async () => fsPromises.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+const readFile = async (filename) => fs.readFile(getFixturePath(filename), 'utf-8');
+const createTempDir = async () => fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 
 nock.disableNetConnect();
 
@@ -24,7 +24,7 @@ beforeEach(() => {
 });
 
 test('Download and save a page', async () => {
-  const pageContent = await readFile('index.html');
+  const pageContent = await readFile('before_html.html');
 
   const testHostName = 'https://ru.hexlet.io';
   const testPathName = '/courses';
@@ -34,7 +34,7 @@ test('Download and save a page', async () => {
 
   const outputPath = await pageLoader(testUrl, tempDir);
 
-  const resultPageContent = await fsPromises.readFile(outputPath, 'utf-8');
+  const resultPageContent = await fs.readFile(outputPath, 'utf-8');
 
   console.log(os.tmpdir(), 'os.tmpdir()');
 

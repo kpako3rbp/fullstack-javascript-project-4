@@ -1,19 +1,27 @@
-import { promises as fsPromises } from 'node:fs';
+import fs from 'fs/promises';
+import { formatWithHyphen, makeAssetsDir, extractAssets } from './utilities.js';
 import path from 'path';
 import axios from 'axios';
 
-const pageLoader = (url, outputPath) => {
-  const parsedUrl = new URL(url);
-  const filename = `${`${parsedUrl.host}${parsedUrl.pathname}`
-    .replace(/[^a-zA-Z0-9_-]/g, '-')
-    .replace(/[^\w\d]+$/, '')}.html`;
-  const filePath = path.resolve(outputPath, filename);
+const pageLoader = (url, outputDirPath) => {
+  const { hostname, pathname } = new URL(url);
+  const formatedUrl = formatWithHyphen(`${hostname}${pathname}`);
+  const htmlPageName = `${formatedUrl}.html`;
+  const htmlPagePath = path.resolve(outputDirPath, htmlPageName);
+  const assetsDirName = `${formatedUrl}_files`;
+  const assetsDirPath = path.resolve(outputDirPath, assetsDirName);
 
-  return fsPromises.access(outputPath)
-    .then(() => axios.get(url))
-    .then((resp) => resp.data)
-    .then((pageContent) => fsPromises.writeFile(filePath, pageContent))
-    .then(() => filePath)
+  return axios
+    .get(url)
+    .then(({ data: htmlContent }) => {
+      extractAssets(htmlContent, hostname, assetsDirName);
+    })
+    .then((htmlContent) => makeAssetsDir(htmlContent, assetsDirPath))
+    .then((htmlContent) => fs.writeFile(htmlPagePath, htmlContent))
+    .then(() => {
+      console.log(`Page was successfully downloaded into '${htmlPagePath}'`);
+      return htmlPagePath;
+    })
     .catch((error) => console.error(error.message));
 };
 
