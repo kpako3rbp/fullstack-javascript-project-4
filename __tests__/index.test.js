@@ -32,7 +32,13 @@ test('Download and save page', async () => {
     .get('/courses')
     .reply(200, testPage)
     .get('/assets/professions/nodejs.png')
-    .reply(200, 'nodejs.png');
+    .reply(200, 'nodejs.png')
+    .get('/assets/application.css')
+    .reply(200, 'application.css')
+    .get('/courses')
+    .reply(200, 'courses.html')
+    .get('/packs/js/runtime.js')
+    .reply(200, 'runtime.js');
 
   const outputPath = await pageLoader(testUrl, tempDir);
 
