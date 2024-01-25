@@ -3,24 +3,16 @@ import path from 'path';
 import cheerio from 'cheerio';
 import axios from 'axios';
 
-const formatWithHyphen = (string) =>
-  string.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '').replace(/[^a-zA-Z0-9]+/g, '-');
+const formatToHyphenCase = (string) => string.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '').replace(/[^a-zA-Z0-9]+/g, '-');
 
-const makeAssetsDir = (htmlContent, assetsDirPath) =>
-  fs
-    .access(assetsDirPath)
-    .then(() => htmlContent)
-    .catch(() => fs.mkdir(assetsDirPath).then(() => htmlContent));
+const ensureAssetsDirectory = (htmlContent, assetsDirPath) => fs
+  .access(assetsDirPath)
+  .then(() => htmlContent)
+  .catch(() => fs.mkdir(assetsDirPath).then(() => htmlContent));
 
 const extractAssets = (htmlContent, hostname, assetsDirName, outputDirPath) => {
   const $ = cheerio.load(htmlContent);
-
-  const tagsAttributes = {
-    img: 'src',
-    link: 'href',
-    script: 'src',
-  };
-
+  const tagsAttributes = { img: 'src', link: 'href', script: 'src' };
   const assetsOptions = [];
 
   Object.entries(tagsAttributes).forEach(([tagName, attrName]) => {
@@ -31,24 +23,22 @@ const extractAssets = (htmlContent, hostname, assetsDirName, outputDirPath) => {
       if (currentHostname === hostname) {
         const fileExt = path.extname(pathname);
         const pathnameWithoutExt = pathname.replace(fileExt, '');
-
-        const filename = `${formatWithHyphen(path.join(hostname, pathnameWithoutExt))}${fileExt}`;
+        const filename = `${formatToHyphenCase(path.join(hostname, pathnameWithoutExt))}${fileExt}`;
         const localFilePath = path.join(assetsDirName, filename);
-
         const absoluteFilePath = path.resolve(outputDirPath, localFilePath);
 
         $(element).attr(attrName, localFilePath);
         assetsOptions.push({ url: fileUrl, filepath: absoluteFilePath });
-        //downloadAsset(fileUrl, localFilePath);
+        // downloadAsset(fileUrl, localFilePath);
       }
     });
   });
 
-  console.log(assetsOptions, 'assetsOptions')
   return { html: $.html(), assetsOptions };
 };
 
-const downloadAsset = ({ url, filepath }) =>
-  axios.get(url, { responseType: 'arraybuffer' }).then(({ data }) => fs.writeFile(filepath, data));
+const downloadAsset = ({ url, filepath }) => axios.get(url, { responseType: 'arraybuffer' }).then(({ data }) => fs.writeFile(filepath, data));
 
-export { formatWithHyphen, makeAssetsDir, extractAssets, downloadAsset };
+export {
+  formatToHyphenCase, ensureAssetsDirectory, extractAssets, downloadAsset,
+};
