@@ -1,9 +1,10 @@
-import { fs } from 'fs/promises';
+import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import nock from 'nock';
 import pageLoader from '../src/index.js';
+import prettier from 'prettier';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -23,21 +24,27 @@ beforeEach(() => {
   nock.cleanAll();
 });
 
-test('Download and save a page', async () => {
-  const pageContent = await readFile('before_html.html');
+test('Download and save page', async () => {
+  const testPage = await readFile('page.html');
+  const expectedPage = await readFile('expected.html');  
 
-  const testHostName = 'https://ru.hexlet.io';
+  const testOrigin = 'https://ru.hexlet.io';
   const testPathName = '/courses';
-  const testUrl = `${testHostName}${testPathName}`;
+  const testUrl = path.join(testOrigin, testPathName);
 
-  nock(testHostName).get(testPathName).reply(200, pageContent);
+  nock(testOrigin).get(testPathName).reply(200, testPage);
 
   const outputPath = await pageLoader(testUrl, tempDir);
 
-  const resultPageContent = await fs.readFile(outputPath, 'utf-8');
+  //console.log(outputPath, 'outputPath');
 
-  console.log(os.tmpdir(), 'os.tmpdir()');
+  const resultPage = await fs.readFile(outputPath, 'utf-8');
+
+  const prettifiedExpectedPage = await prettier.format(expectedPage, { parser: 'html' });
+  const prettifiedResultPage = await prettier.format(resultPage, { parser: 'html' });
+
+  //console.log(os.tmpdir(), 'os.tmpdir()');
 
   expect(outputPath).toEqual(path.join(tempDir, 'ru-hexlet-io-courses.html'));
-  expect(resultPageContent).toEqual(pageContent);
+  expect(prettifiedResultPage).toEqual(prettifiedExpectedPage);
 });
