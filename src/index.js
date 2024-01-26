@@ -33,7 +33,6 @@ const pageLoader = (url, outputDirPath = '') => {
   const { hostname, pathname } = pageUrl;
   const formattedUrl = formatToHyphenCase(`${hostname}${pathname}`);
   const htmlFileName = `${formattedUrl}.html`;
-  console.log('PAAAAAAAAAAAAAAAAAAAAATH', outputDirPath, htmlFileName)
   const htmlFilePath = path.resolve(outputDirPath, htmlFileName);
   const assetsDirName = `${formattedUrl}_files`;
   const assetsDirPath = path.resolve(outputDirPath, assetsDirName);
