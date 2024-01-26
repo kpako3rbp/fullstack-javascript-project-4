@@ -21,8 +21,3 @@ To use CLI -> link the project in the system
 ```sh
 make link
 ```
-
-
-[![asciicast](https://asciinema.org/a/607164.svg)](https://asciinema.org/a/607164)
-
-[![asciicast](https://asciinema.org/a/607884.svg)](https://asciinema.org/a/607884)
