@@ -21,3 +21,5 @@ To use CLI -> link the project in the system
 ```sh
 make link
 ```
+
+asciinema play https://asciinema.org/a/zc6loT2UqSg5NkfDAy1F9CqsO
