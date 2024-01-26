@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
 import cheerio from 'cheerio';
-import axios from 'axios';
 
 const formatToHyphenCase = (string) => string.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '').replace(/[^a-zA-Z0-9]+/g, '-');
 
@@ -20,20 +19,20 @@ const extractAssets = (htmlContent, pageUrl, assetsDirName, outputDirPath) => {
     $(tagName).each((index, element) => {
       const src = $(element).attr(attrName);
       // если полный путь, то ничего не изменится. Если относительный, то добавится адрес сайта
-      const fileUrl = new URL(src, origin);
-      const { hostname: currentHostname, pathname } = fileUrl;
+      if (src) {
+        const fileUrl = new URL(src, origin);
+        const { hostname: currentHostname, pathname } = fileUrl;
 
-      if (currentHostname === hostname) {
-        const fileExt = path.extname(pathname) || '.html';
-        const pathnameWithoutExt = pathname.replace(fileExt, '');
-        const filename = `${formatToHyphenCase(path.join(hostname, pathnameWithoutExt))}${fileExt}`;
-        const localFilePath = path.join(assetsDirName, filename);
-        const absoluteFilePath = path.resolve(outputDirPath, localFilePath);
+        if (currentHostname === hostname) {
+          const fileExt = path.extname(pathname) || '.html';
+          const pathnameWithoutExt = pathname.replace(fileExt, '');
+          const filename = `${formatToHyphenCase(path.join(hostname, pathnameWithoutExt))}${fileExt}`;
+          const localFilePath = path.join(assetsDirName, filename);
+          const absoluteFilePath = path.resolve(outputDirPath, localFilePath);
 
-        $(element).attr(attrName, localFilePath);
-        assetsOptions.push({ url: fileUrl, filepath: absoluteFilePath });
-        // console.log('assetsOptions:', assetsOptions);
-        // downloadAsset(fileUrl, localFilePath);
+          $(element).attr(attrName, localFilePath);
+          assetsOptions.push({ url: fileUrl, filepath: absoluteFilePath });
+        }
       }
     });
   });
@@ -41,8 +40,4 @@ const extractAssets = (htmlContent, pageUrl, assetsDirName, outputDirPath) => {
   return { html: $.html(), assetsOptions };
 };
 
-const downloadAsset = ({ url, filepath }) => axios.get(url, { responseType: 'arraybuffer' }).then(({ data }) => fs.writeFile(filepath, data));
-
-export {
-  formatToHyphenCase, ensureAssetsDirectory, extractAssets, downloadAsset,
-};
+export { formatToHyphenCase, ensureAssetsDirectory, extractAssets };

@@ -66,9 +66,9 @@ test('Download and save page', async () => {
 
   const assetsDirection = 'ru-hexlet-io-courses_files';
   const assetsPromises = assetsPaths.map((filepath) => {
-    const fullPath = path.join(tempDir, assetsDirection, filepath);
+    const fullAssetPath = path.join(tempDir, assetsDirection, filepath);
     return fs
-      .access(fullPath)
+      .access(fullAssetPath)
       .then(() => true) // Файл существует и доступен
       .catch((error) => {
         if (error.code === 'ENOENT') {

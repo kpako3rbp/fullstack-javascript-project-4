@@ -7,7 +7,6 @@ program
   .description('Page loader utility')
   .arguments('<url>')
   .option('-o, --output [dir]', 'output dir', process.cwd())
-  .action((url) => pageLoader(url, program.opts().output)
-    .then((filepath) => console.log(filepath)));
+  .action((url) => pageLoader(url, program.opts().output));
 
 program.parse();
