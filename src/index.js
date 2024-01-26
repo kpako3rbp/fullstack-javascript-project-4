@@ -77,7 +77,7 @@ const pageLoader = (url, outputDirPath) => {
     })
     .catch((error) => {
       log(`Error occurred: ${error.message}`);
-      console.error(error.message, ':', error);
+      console.error(error.message);
       throw error;
     });
 };
