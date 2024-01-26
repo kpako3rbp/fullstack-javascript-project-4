@@ -19,6 +19,7 @@ let tempDir;
 
 beforeAll(async () => {
   tempDir = await createTempDir();
+  console.log('Temporary direction:', tempDir);
 });
 
 beforeEach(() => {
@@ -26,11 +27,11 @@ beforeEach(() => {
 });
 
 test('Download and save page', async () => {
-  const testPage = await readFixture('page.html');
+  const testPageData = await readFixture('page.html');
 
   nock('https://ru.hexlet.io')
     .get('/courses')
-    .reply(200, testPage)
+    .reply(200, testPageData)
     .get('/assets/professions/nodejs.png')
     .reply(200, 'nodejs.png')
     .get('/assets/application.css')
@@ -41,12 +42,8 @@ test('Download and save page', async () => {
     .reply(200, 'runtime.js');
 
   const outputPath = await pageLoader(testUrl, tempDir);
-
-  // console.log(outputPath, 'outputPath');
-  console.log(tempDir, 'tempDir');
-
-  const resultPage = await fs.readFile(outputPath, 'utf-8');
   const expectedPage = await readFixture('expected.html');
+  const resultPage = await fs.readFile(outputPath, 'utf-8');
 
   const prettifiedExpectedPage = await prettier.format(expectedPage, { parser: 'html' });
   const prettifiedResultPage = await prettier.format(resultPage, { parser: 'html' });
@@ -56,7 +53,6 @@ test('Download and save page', async () => {
   expect(outputPath).toEqual(path.join(tempDir, 'ru-hexlet-io-courses.html'));
   expect(prettifiedResultPage).toEqual(prettifiedExpectedPage);
 
-  // Check that resources were downloaded
   const assetsPaths = [
     'ru-hexlet-io-assets-professions-nodejs.png',
     'ru-hexlet-io-assets-application.css',
@@ -81,4 +77,28 @@ test('Download and save page', async () => {
   const resourcesDownloaded = await Promise.all(assetsPromises);
 
   expect(resourcesDownloaded.every((value) => value)).toBeTruthy();
+});
+
+test('404', async () => {
+  // Эмулируем сетевую ошибку, когда страница не найдена
+  nock('https://incorrect')
+    .get('/err')
+    .reply(404);
+
+  await expect(pageLoader('https://incorrect/err', tempDir)).rejects.toThrow();
+});
+
+test('Network error', async () => {
+  // Эмулируем сетевую ошибку, например, отсутствие соединения с сервером
+  nock('https://incorrect')
+    .get('/err')
+    .replyWithError('Network error');
+
+  await expect(pageLoader('https://incorrect/err', tempDir)).rejects.toThrow();
+});
+
+test('File system access error', async () => {
+  // Эмулируем ошибку доступа к файловой системе или отсутствие директории
+  const invalidDir = '/invalid/directory';
+  await expect(pageLoader('https://example.com', invalidDir)).rejects.toThrow();
 });

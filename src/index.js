@@ -2,11 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
 import configDebug from 'axios-debug-log';
-import {
-  formatToHyphenCase,
-  ensureAssetsDirectory,
-  extractAssets,
-} from './utilities.js';
+import Listr from 'listr';
+import { formatToHyphenCase, ensureAssetsDirectory, extractAssets } from './utilities.js';
 import log from './page-loader-debug.js';
 
 configDebug({
@@ -29,12 +26,11 @@ const downloadAsset = ({ url, filepath }) => axios
 
     return fs.writeFile(filepath, data);
   })
-  .catch((e) => console.log('ERROR:', e.message));
+  .catch((e) => console.error(e.message));
 
 const pageLoader = (url, outputDirPath) => {
   const pageUrl = new URL(url);
   const { hostname, pathname } = pageUrl;
-  // console.log('pathname', pathname);
   const formattedUrl = formatToHyphenCase(`${hostname}${pathname}`);
   const htmlFileName = `${formattedUrl}.html`;
   const htmlFilePath = path.resolve(outputDirPath, htmlFileName);
@@ -61,13 +57,19 @@ const pageLoader = (url, outputDirPath) => {
         assetsDirName,
         outputDirPath,
       );
-      const downloadAssetsPromises = assetsOptions.map(downloadAsset);
+
+      const tasks = assetsOptions.map((asset) => ({
+        title: asset.url.href,
+        task: () => downloadAsset(asset),
+      }));
+
+      const taskRun = new Listr(tasks, { concurrent: true });
+      const downloadAssetPromises = taskRun.run();
 
       log(`Writing HTML file to path: ${htmlFilePath}`);
 
-      return Promise.all([fs.writeFile(htmlFilePath, html), ...downloadAssetsPromises]).catch(
-        (error) => console.error(error.message),
-      );
+      return Promise.all([fs.writeFile(htmlFilePath, html), downloadAssetPromises])
+        .catch((error) => console.error(error.message));
     })
     .then(() => {
       console.log(`Page was successfully downloaded into '${htmlFilePath}'`);
@@ -75,7 +77,8 @@ const pageLoader = (url, outputDirPath) => {
     })
     .catch((error) => {
       log(`Error occurred: ${error.message}`);
-      console.error(`${error.message}:`, error);
+      console.error(error.message, ':', error);
+      throw error;
     });
 };
 
