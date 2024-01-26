@@ -28,7 +28,7 @@ const downloadAsset = ({ url, filepath }) => axios
   })
   .catch((e) => console.error(e.message));
 
-const pageLoader = (url, outputDirPath) => {
+const pageLoader = (url, outputDirPath = '') => {
   const pageUrl = new URL(url);
   const { hostname, pathname } = pageUrl;
   const formattedUrl = formatToHyphenCase(`${hostname}${pathname}`);
