@@ -1,10 +1,10 @@
-### Hexlet tests and linter status:
+# Page-loader
+
+Page-loader is a program to load html pages along with their resources.
+
 [![Actions Status](https://github.com/kpako3rbp/fullstack-javascript-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/kpako3rbp/fullstack-javascript-project-4/actions)
-
 [![Maintainability](https://api.codeclimate.com/v1/badges/a4182fcb2cf76c2cd9ba/maintainability)](https://codeclimate.com/github/kpako3rbp/fullstack-javascript-project-4/maintainability)
-
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a4182fcb2cf76c2cd9ba/test_coverage)](https://codeclimate.com/github/kpako3rbp/fullstack-javascript-project-4/test_coverage)
-
 [![loader-test](https://github.com/kpako3rbp/fullstack-javascript-project-4/actions/workflows/main.yml/badge.svg)](https://github.com/kpako3rbp/fullstack-javascript-project-4/actions/workflows/main.yml)
 
 ## Installation
